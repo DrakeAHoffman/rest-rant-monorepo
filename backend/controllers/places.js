@@ -94,6 +94,21 @@ router.post('/:placeId/comments', async (req, res) => {
         res.status(404).json({ message: `Could not find place with id "${placeId}"` })
     }
 
+    if (!req.currentUser) {
+        return res.status(404).json({ message: `You must be logged in to leave a rant or rave.` })
+    }
+
+    const comments = await Comment.create({
+        ...req.body,
+        authorId: req.currentUser.userId,
+        placeId: placeId
+    })
+
+    res.send({
+        ...comment.toJSON(),
+        author: req.currentUser
+    })
+
     let currentUser;
     try {
         const [method, token] = req.headers.authorization.split(' ')
